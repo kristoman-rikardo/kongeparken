@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kongeparken Testside</title>
+  <link rel="icon" href="https://irp.cdn-website.com/7eee613e/dms3rep/multi/Sommerlogo_nobg.png" type="image/png">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: url('https://lirp.cdn-website.com/7eee613e/dms3rep/multi/opt/Kongeparken_KV_Landscape_RGB_AW_new-1920w.jpeg') no-repeat center center fixed;
+      background-size: cover;
+      font-family: Arial, sans-serif;
+    }
+
+    .chat-circle {
+      position: fixed;
+      bottom: -18px; /* Avstanden fra sirkelens SENTER til bunn */
+      right: -18px;  /* Avstanden fra sirkelens SENTER til høyre */
+      width: 150px; /* Sirkelens bredde */
+      height: 150px; /* Sirkelens høyde */
+      background-color: white;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    svg {
+      width: 150px;
+      height: 150px;
+    }
+
+    .circle-text path {
+      fill: none;
+      stroke: none;
+    }
+
+    .circle-text text {
+      font-size: 28px; /* Tekststørrelse */
+      font-weight: bold;
+      fill: rgb(64, 117, 105); /* Fargen på teksten */
+      text-anchor: middle;
+      transform: rotate(-90deg); /* Rotasjon av teksten (90 grader mot venstre) */
+      transform-origin: center; /* Rotasjonen skjer rundt midtpunktet */
+    }
+  </style>
+</head>
+<body>
+  <!-- Chatbot Circle -->
+  <div class="chat-circle">
+    <svg viewBox="0 0 150 150">
+      <path
+        id="circlePath"
+        d="M 75, 75 m -60, 0 a 60,60 0 1,1 120,0 a 60,60 0 1,1 -120,0"
+        fill="none"
+        stroke="none"
+        transform="rotate(230 75 75)"
+      ></path>
+      <text class="circle-text">
+        <textPath href="#circlePath" startOffset="25%">
+          PRØV CHATBOTEN HER
+        </textPath>
+      </text>
+    </svg>
+  </div>
+  <!-- Chatbot-widget -->
+  <script>
+const FormExtension = {
+  name: 'Forms',
+  type: 'response',
+  match: ({ trace }) =>
+    trace.type === 'Custom_Form' || trace.payload.name === 'Custom_Form',
+  render: ({ trace, element }) => {
+    const formContainer = document.createElement('form');
+
+    // Form HTML
+    formContainer.innerHTML = `
+      <style>
+        form {
+          font-family: 'Roboto', sans-serif;
+          max-width: 100%;
+          margin: auto;
+          padding: 0px;
+          background-color: transparent;
+          border-radius: 8px;
+        }
+        label {
+          font-size: 1em;
+          color: #333;
+          display: block;
+          margin: 10px 0 5px;
+          font-weight: 500;
+        }
+        input[type="text"], input[type="email"], textarea {
+          width: 100%;
+          border: 2px solid #FF0006;
+          background-color: #fff;
+          color: #333;
+          margin: 10px 0;
+          padding: 10px;
+          outline: none;
+          font-size: 1em;
+          font-family: Arial, sans-serif;
+          border-radius: 8px;
+          box-sizing: border-box;
+        }
+        textarea {
+          height: 100px;
+        }
+        .submit {
+          background-color: #FF0006;
+          border: none;
+          color: white;
+          padding: 12px;
+          border-radius: 8px;
+          margin-top: 20px;
+          width: 100%;
+          cursor: pointer;
+          font-size: 1em;
+          font-weight: 500;
+        }
+        .success-message {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          font-family: 'Roboto', sans-serif;
+          font-size: 1.5em;
+          font-weight: bold;
+          color: #2C7E7C;
+        }
+        .success-icon {
+          font-size: 3em;
+          color: #2C7E7C;
+        }
+        .loading {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          font-family: 'Roboto', sans-serif;
+          font-size: 1.2em;
+          color: #666;
+        }
+      </style>
+
+      <label for="email">Mail</label>
+      <input type="email" class="email" name="email" required
+            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+            title="Ugyldig e-post"><br><br>
+
+      <label for="topic">Emne</label>
+      <input type="text" class="topic" name="topic" required><br><br>
+
+      <label for="userQuestion">Melding</label>
+      <textarea class="userQuestion" name="userQuestion" required></textarea><br><br>
+
+      <input type="submit" class="submit" value="Send">
+    `;
+
+    // Submit Event Listener
+    formContainer.addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      // Collect form values
+      const email = formContainer.querySelector('.email').value;
+      const topic = formContainer.querySelector('.topic').value;
+      const userQuestion = formContainer.querySelector('.userQuestion').value;
+
+      // Validate data if needed
+      if (!email || !topic || !userQuestion) {
+        alert('Du må fylle ut alle feltene!');
+        return;
+      }
+
+      // Interact with Voiceflow
+      window.voiceflow.chat.interact({
+        type: 'text',
+        payload: {
+          email,
+          topic,
+          userQuestion,
+        },
+      });
+
+      // Show loading message
+      element.innerHTML = `
+        <div class="loading">Sender inn skjemaet...</div>
+      `;
+
+      // Delay for 1.5 seconds, then show success message
+      setTimeout(() => {
+        element.innerHTML = `
+          <div class="success-message">
+            <div class="success-icon">✅</div>
+            <div>Skjemaet er sendt inn!</div>
+          </div>
+        `;
+      }, 1500); // 1.5 second delay
+    });
+
+    // Append the form to the provided element
+    if (element) {
+      element.appendChild(formContainer);
+    } else {
+      console.error('Invalid element passed to render function.');
+    }
+  },
+};
+ let proactiveMessage = "Hei, jeg hjelper deg gjerne!🐻";
+    let widgetStyleSheet = "https://swnevin.github.io/norwaycup_assets/styleKP.css";
+
+    (function(d, t) {
+      var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
+      v.onload = function() {
+        window.voiceflow.chat.load({
+          verify: { projectID: '6788e62fd604871f7c5764d9' },
+          url: 'https://general-runtime.voiceflow.com',
+          versionID: 'production',
+          allowDangerousHTML: true,
+          assistant: {
+            stylesheet: widgetStyleSheet,
+            extensions: [FormExtension]
+          }
+        }).then(() => {
+          console.log('Voiceflow widget loaded successfully');
+          window.voiceflow.chat.proactive.clear();
+          window.voiceflow.chat.proactive.push(
+            { type: 'text', payload: { message: proactiveMessage } }
+          );
+        }).catch((err) => console.error('Widget load failed:', err));
+      };
+      v.src = "https://cdn.voiceflow.com/widget/bundle.mjs";
+      v.type = "text/javascript";
+      s.parentNode.insertBefore(v, s);
+    })(document, 'script');
+  </script>
+</body>
+</html>
